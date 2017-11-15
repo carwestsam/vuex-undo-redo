@@ -15,18 +15,20 @@ class StateHistoryMgr {
     this.origin[key] = raw
 
     origin.mutations[key] = function() {
-      shm.append(key, arguments)
-      raw().forward.apply(null, arguments)
+      let capsule = {}
+      shm.append(key, arguments, capsule)
+      raw().forward.apply(null, [capsule, ...arguments])
     }
   }
 
-  append(key, args) {
+  append(key, args, capsule) {
     if (this.history.length > 0 && this.history.length > this.historyPt){
       this.history = this.history.slice(0, this.historyPt)
     } 
     this.history.push({
       mutation: key,
-      args
+      args,
+      capsule
     })
     this.historyPt += 1
   }
@@ -34,6 +36,7 @@ class StateHistoryMgr {
   emptyHistoryPointer() {
     this.historyPt = 0
     this.history = []
+    this.origin = {}
   }
 
   resetHistoryPointer() {
@@ -43,10 +46,9 @@ class StateHistoryMgr {
     if (this.historyPt === 0) {
       return
     }
-
-    let {mutation, args} = this.history[this.historyPt - 1]
-    this.origin[mutation]().backward.apply(null, args)
-
+    
+    let {mutation, args, capsule} = this.history[this.historyPt - 1]
+    this.origin[mutation]().backward.apply(null, [capsule, ...args])
     this.historyPt -= 1
   }
 
@@ -54,8 +56,9 @@ class StateHistoryMgr {
     if (this.historyPt === this.history.length) {
       return
     }
-    let {mutation, args} = this.history[this.historyPt]
-    this.origin[mutation]().forward.apply(null, args)
+    let {mutation, args, capsule} = this.history[this.historyPt]
+
+    this.origin[mutation]().forward.apply(null, [capsule, ...args])
 
     this.historyPt += 1
   }
