@@ -22,8 +22,10 @@ class StateHistoryMgr {
   }
 
   undo () {
-    let {mutation, args} = this.history[0]
+    console.log(this.history)
+    let {mutation, args} = this.history[this.history.length-1]
     this.origin[mutation]().backward.apply(null, args)
+    this.history.splice(this.history.length-1)
   }
 }
 shm = new StateHistoryMgr()
@@ -44,7 +46,6 @@ class VuexConfigGenerator {
       }
     }
   }
-
 }
 
 module.exports = {VuexConfigGenerator, StateHistoryMgr}
