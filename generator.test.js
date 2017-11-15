@@ -29,6 +29,7 @@ describe("Test Generator working properly", function() {
       expect(0).to.be.eq($store.getters.o_count)
     })
   })
+
   describe("Should have undo operation", function () {
     GeneratedVuexDes = new VuexConfigGenerator(OriginVuexDes).attachMutations({
       addCount: function () {
@@ -45,6 +46,7 @@ describe("Test Generator working properly", function() {
     $store = new Vuex.Store(OriginVuexDes)
 
     it('1, going forword', function() {
+      shm.emptyHistoryPointer()
       $store.commit('addCount', 10)
       expect($store.getters.o_count).to.be.eq(10)
     })
@@ -61,6 +63,31 @@ describe("Test Generator working properly", function() {
       expect($store.getters.o_count).to.be.eq(4)
       shm.undo()
       expect($store.getters.o_count).to.be.eq(0)
+    })
+  })
+  describe("should redo operation", function () {
+    GeneratedVuexDes = new VuexConfigGenerator(OriginVuexDes).attachMutations({
+      addCount: function () {
+        return {
+          forward: function (state, number) {
+            state.count += number
+          },
+          backward: function (state, number) {
+            state.count -= number
+          }
+        }
+      }
+    })
+    $store = new Vuex.Store(OriginVuexDes)
+
+    it('undo and redo', function () {
+      shm.emptyHistoryPointer()
+      $store.commit('addCount', 4)
+      expect($store.getters.o_count).to.be.eq(4)
+      shm.undo()
+      expect($store.getters.o_count).to.be.eq(0)
+      shm.redo()
+      expect($store.getters.o_count).to.be.eq(4)
     })
   })
 })

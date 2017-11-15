@@ -3,6 +3,7 @@ class StateHistoryMgr {
   constructor () {
     this.history = []
     this.origin = {}
+    this.historyPt = 0 // next position
   }
   static getInstance () {
     if (typeof shm == 'undefined') {
@@ -10,22 +11,47 @@ class StateHistoryMgr {
     }
     return shm
   }
-  addRawMutation(key, raw) {
+  addRawMutation(origin, key, raw) {
     this.origin[key] = raw
+
+    origin.mutations[key] = function() {
+      shm.append(key, arguments)
+      raw().forward.apply(null, arguments)
+    }
   }
 
   append(key, args) {
-    this.history.push({
-      mutation: key,
-      args
-    })
+    if (this.history.length > this.historyPt){
+      this.history[this.historyPt] = {mutation: key, args}
+    } else {
+      this.history.push({
+        mutation: key,
+        args
+      })
+    }
+    this.historyPt += 1
+  }
+
+  emptyHistoryPointer() {
+    this.historyPt = 0
+    this.history = []
+  }
+
+  resetHistoryPointer() {
   }
 
   undo () {
-    console.log(this.history)
-    let {mutation, args} = this.history[this.history.length-1]
+    let {mutation, args} = this.history[this.historyPt - 1]
     this.origin[mutation]().backward.apply(null, args)
-    this.history.splice(this.history.length-1)
+
+    this.historyPt -= 1
+  }
+
+  redo () {
+    let {mutation, args} = this.history[this.historyPt]
+    this.origin[mutation]().forward.apply(null, args)
+
+    this.historyPt += 1
   }
 }
 shm = new StateHistoryMgr()
@@ -36,14 +62,9 @@ class VuexConfigGenerator {
   }
   attachMutations (attachObject) {
     for ( let key in attachObject ){
-      let func = attachObject[key]     
       let shm = StateHistoryMgr.getInstance()
-      shm.addRawMutation(key, func)
-
-      this.origin.mutations[key] = function() {
-        shm.append(key, arguments)
-        func().forward.apply(null, arguments)
-      }
+      let func = attachObject[key]
+      shm.addRawMutation(this.origin, key, func)
     }
   }
 }
