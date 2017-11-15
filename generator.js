@@ -21,14 +21,13 @@ class StateHistoryMgr {
   }
 
   append(key, args) {
-    if (this.history.length > this.historyPt){
-      this.history[this.historyPt] = {mutation: key, args}
-    } else {
-      this.history.push({
-        mutation: key,
-        args
-      })
-    }
+    if (this.history.length > 0 && this.history.length > this.historyPt){
+      this.history = this.history.slice(0, this.historyPt)
+    } 
+    this.history.push({
+      mutation: key,
+      args
+    })
     this.historyPt += 1
   }
 
@@ -41,6 +40,10 @@ class StateHistoryMgr {
   }
 
   undo () {
+    if (this.historyPt === 0) {
+      return
+    }
+
     let {mutation, args} = this.history[this.historyPt - 1]
     this.origin[mutation]().backward.apply(null, args)
 
@@ -48,6 +51,9 @@ class StateHistoryMgr {
   }
 
   redo () {
+    if (this.historyPt === this.history.length) {
+      return
+    }
     let {mutation, args} = this.history[this.historyPt]
     this.origin[mutation]().forward.apply(null, args)
 
