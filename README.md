@@ -3,8 +3,12 @@
 Vuex didn't have a native way to handle undo & redo actions,
 which is very useful when you want to build editor like applications.
 
-I created this helper, to generate mutaions for me. It need a new pattern to create mutations,
+I created this helper, to generate mutations for me. It need a new pattern to create mutations,
 like db migration concept. it has forward & backword methods for each mutation.
+
+P.S.
+
+This Project is an Side Outcome from another project, I'm not going to update this project unless get stars, which means this is helpful for others.
 
 # Example
 
@@ -89,8 +93,9 @@ shm.redo()
 
 # ToDo
 
-- [ ] Release to NPM
-- [ ] Available for multiple modules
+- [ ] Release to NPM (After 2 stars)
+- [ ] Examples & Live Demos (After 10 stars)
+- [ ] Available for multiple modules (After 50 stars)
 
 # Requirements
 
