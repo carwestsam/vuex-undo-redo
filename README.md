@@ -10,6 +10,19 @@ P.S.
 
 This Project is an Side Outcome from another project, I'm not going to update this project unless get stars, which means this is helpful for others.
 
+# Explain
+
+### forward & backward
+
+Like DB migration. Each Mutation should have this two function,
+their are required. when you call \$store.commit, forward function will be called.
+When shm.undo(), backward will be called. If followed with shm.redo(), forward will be call again, with previous capsule.
+
+### capsule
+
+created for share variables between forward & backword. Will be {} for the first forward call
+
+
 # Example
 
 ### how to define it
